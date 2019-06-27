@@ -22,9 +22,11 @@
     <script type="text/javascript">
         debugger;
         // the json file (model topology) has a reference to the bin file (model weights)
-        const checkpointURL = 'https://storage.googleapis.com/tm-mobilenet/BoxorMug20190626/model.json';
+        // const checkpointURL = 'https://storage.googleapis.com/tm-mobilenet/BoxorMug20190626/model.json';
+        const checkpointURL = 'http://localhost:8080/models/model.json';
         // the metatadata json file contains the text labels of your model and additional information
-        const metadataURL = 'https://storage.googleapis.com/tm-mobilenet/BoxorMug20190626/metadata.json';
+        // const metadataURL = 'https://storage.googleapis.com/tm-mobilenet/BoxorMug20190626/metadata.json';
+        const metadataURL = 'http://localhost:8080/models/metadata.json';
 
         let model;
         let webcamEl;
@@ -54,7 +56,7 @@
             document.getElementById("base64-image").src = img001;
             var image = document.getElementById('base64-image');
             // const prediction = await model.predict(webcamEl, flip, maxPredictions);
-            const prediction = await model.predict(img001, flip, maxPredictions);
+            const prediction = await model.predict(image, flip, maxPredictions);
             console.log(prediction);
         }
         init();
