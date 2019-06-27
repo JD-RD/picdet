@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>64base Image Classification</title>
+  <meta name="author" content="">
+  <meta name="description" content="64base Image Classification">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <p>64base Image Classification</p>
+    <img id="base64-image" src=''/>
+    <br>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.1.2/dist/tf.min.js"></script>
+    <script src="https://storage.googleapis.com/tm-pro/v1.0.5-c/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        debugger;
+        // the json file (model topology) has a reference to the bin file (model weights)
+        const checkpointURL = 'https://storage.googleapis.com/tm-mobilenet/BoxorMug20190626/model.json';
+        // the metatadata json file contains the text labels of your model and additional information
+        const metadataURL = 'https://storage.googleapis.com/tm-mobilenet/BoxorMug20190626/metadata.json';
+
+        let model;
+        let webcamEl;
+
+        async function init() {
+            // load the model and metadata
+            model = await tm.mobilenet.load(checkpointURL, metadataURL);
+            const maxPredictions = model.getTotalClasses();
+
+            // optional function for creating a webcam
+            // webcam has a square ratio and is flipped by default to match training
+            const webcamFlipped = true;
+            webcamEl = await tm.getWebcam(200, 200, 'front', webcamFlipped);
+            webcamEl.play();
+            document.body.appendChild(webcamEl);
+
+            // use tm.mobilenet.loadFromFiles() function to support files from a file picker or files from your local hard drive
+            // you need to create File objects, like with file input elements (<input type="file" ...>)
+            // const uploadJSONInput = document.getElementById('upload-json');
+            // const uploadWeightsInput = document.getElementById('upload-weights');
+            // model = await tm.mobilenet.loadFromFiles(uploadJSONInput.files[0], uploadWeightsInput.files[0])
+
+            // predict can take in an image, video or canvas html element
+            // we set flip to true since the webcam was only flipped in CSS
+            const flip = true;
+            const img001 = 'data:image/jpg;base64,/9j/4QAYRXhpZgAASUkqAAgAAAAAAAAAAAAAAP/sABFEdWNreQABAAQAAAAKAAD/4QMtaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJBZG9iZSBYTVAgQ29yZSA1LjMtYzAxMSA2Ni4xNDU2NjEsIDIwMTIvMDIvMDYtMTQ6NTY6MjcgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDUzYgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MjlGRTk4NkY5MEE3MTFFOUIyN0VDNzZBRDMyRjUwMjMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MjlGRTk4NzA5MEE3MTFFOUIyN0VDNzZBRDMyRjUwMjMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoyOUZFOTg2RDkwQTcxMUU5QjI3RUM3NkFEMzJGNTAyMyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoyOUZFOTg2RTkwQTcxMUU5QjI3RUM3NkFEMzJGNTAyMyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pv/uAA5BZG9iZQBkwAAAAAH/2wCEABQQEBkSGScXFycyJh8mMi4mJiYmLj41NTU1NT5EQUFBQUFBREREREREREREREREREREREREREREREREREREREQBFRkZIBwgJhgYJjYmICY2RDYrKzZERERCNUJERERERERERERERERERERERERERERERERERERERERERERERERERP/AABEIAFAAYQMBIgACEQEDEQH/xACCAAEAAgMBAQAAAAAAAAAAAAAABQYCAwQBBwEAAgMBAAAAAAAAAAAAAAAAAAQBAwUCEAABAwIDBAgFBQEAAAAAAAABAAIDEQQhMRJBUWEFcYGhwdEiExSR4VMVBvCxMlIjYhEAAgMAAQQDAQAAAAAAAAAAAAERAgMhMUESE1FhBBT/2gAMAwEAAhEDEQA/ALmiIgAsJJGxNL3mjRmVmq3+QXxc4WrMhi/idg/XcpSk5s/FSS33e0+oO1Dze0AqZB2qmws1uos7iPSMMjgmaYp9Rd7wWv75Y/VHb4L375Y/VHwPgqC+LSaLcyIBMV/In3Z0tWy+2/M7a5f6cTw52dMV2L5y17rd7ZYzRzTUK+2V2y8hbMzbmNx2hK7Zet/RcnJ0oiJc6CIiACIvCaIA5726FrEXnPJo4quGN0vn2nvWy8u/ezeU1jbgPHrW+Bg6hkqvakxPW88LoIbVzG0wqc17LDQaTtXUCj49YyxTmVxNy2QNxCT5cKhavbOY2ppVTPtmvdVwOCwmiaDSmBWgtewxlnPJASQOJ6VJciu3WcvpSH/N/Ydh8V4+MVIotRhB2FTequoZo1zZdkUfyu79xHocfOzA8RsKkFk2q6t1fYGo4CIi5IChPyC/NvF6DP5yDE7m/NTajub2HvYSGj/RuLPDrXNphwQ+nBW7MemNB2lSkR1Cm5QUMhGBPmBU3bODmCme1ZV1WZYndM7Gb12RCnWuWMY8F2RimJTmep1nmYzREHVXNR00NPLXNd80uOeAUbNMc64rQz0NPLM5XMphuWLhpFV653Fc8smyuCb9qgc8TO3uHWswlGW0cFbmuDgHDI4qq8qtTdzan4xsxPHcFa0trZNr57iOsTwERFQUhERAFW53y/0JhcsHkcfMP+vn+6yshpGr+1FY54WzsMbxUFV0EW0pikwISP6M+PKpHh5cErG3Ytsj9IouWG4YAQTisHzg1IPQkK2suBjPKDyaSp07lHSy6jVezzUwrjtXK546loZ6M0M84Mi5aHBz3CJgqXUosXyAY16FNfj9lWt0/oZ3nu+Kerfj7Odr+KJixtBaRCMZ5uO8rpRFHUy255CIiCAiIgAobnto58XrxCr2Z8W/JTKKGpUMlOHJS4rmVzQS3HbgVtNzIMdGG5W9Et/OvkuWzRQpJ5XEuLMTwK1mWUimnsK+gorPUi3+q3SCjWVnJeytjoQM3GmQV3jjbG0MYKNAoAskVlawUaaPR8hERdFQREQB/9k='
+            document.getElementById("base64-image").src = img001;
+            var image = document.getElementById('base64-image');
+            // const prediction = await model.predict(webcamEl, flip, maxPredictions);
+            const prediction = await model.predict(img001, flip, maxPredictions);
+            console.log(prediction);
+        }
+        init();
+    </script>
+
+
+</body>
+
+</html>
